@@ -6,363 +6,176 @@
 <title>OnlyHotLeads — AI Lead Qualification</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%23ff4d1c'/><stop offset='100%25' stop-color='%23ff8c00'/></linearGradient></defs><path d='M16 2C16 2 22 8 22 14C22 17 20 19 18 20C19 17 17 14 15 13C15 16 13 18 11 20C9 18 8 16 8 14C8 9 11 5 16 2Z' fill='url(%23g)'/><path d='M16 18C16 18 19 21 19 24C19 27 17.5 29 16 29C14.5 29 13 27 13 24C13 21 16 18 16 18Z' fill='%23ffb347'/></svg>">
 <style>
   :root {
-    --bg: #050508;
-    --surface: #0d0d14;
-    --border: rgba(255,255,255,0.07);
-    --accent: #ff4d1c;
-    --accent2: #ff8c00;
-    --glow: rgba(255,77,28,0.18);
-    --text: #f0eee8;
-    --muted: #5a5963;
-    --card: #0f0f18;
+    --bg: #050508; --surface: #0d0d14; --border: rgba(255,255,255,0.07);
+    --accent: #ff4d1c; --accent2: #ff8c00; --glow: rgba(255,77,28,0.18);
+    --text: #f0eee8; --muted: #5a5963; --card: #0f0f18;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    overflow-x: hidden;
-    cursor: none;
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; cursor: none; min-height: 100vh; }
 
   /* CURSOR */
-  .cursor {
-    position: fixed; width: 10px; height: 10px;
-    background: var(--accent); border-radius: 50%;
-    pointer-events: none; z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: width 0.2s, height 0.2s;
-    mix-blend-mode: difference;
-  }
-  .cursor-ring {
-    position: fixed; width: 34px; height: 34px;
-    border: 1px solid rgba(255,77,28,0.45); border-radius: 50%;
-    pointer-events: none; z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: all 0.12s ease;
-  }
+  .cursor { position:fixed; width:10px; height:10px; background:var(--accent); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .2s,height .2s; mix-blend-mode:difference; }
+  .cursor-ring { position:fixed; width:34px; height:34px; border:1px solid rgba(255,77,28,0.45); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:all .12s ease; }
 
-  /* NOISE */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 1000; opacity: 0.35;
-  }
-
-  /* GRID */
-  .grid-bg {
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,77,28,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,77,28,0.025) 1px, transparent 1px);
-    background-size: 72px 72px;
-    pointer-events: none;
-  }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:1000; opacity:.35; }
+  .grid-bg { position:fixed; inset:0; background-image:linear-gradient(rgba(255,77,28,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,77,28,0.025) 1px,transparent 1px); background-size:72px 72px; pointer-events:none; }
 
   /* NAV */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    padding: 22px 48px;
-    display: flex; justify-content: space-between; align-items: center;
-    z-index: 100;
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(24px);
-    background: rgba(5,5,8,0.85);
-  }
-  .logo {
-    font-family: 'DM Mono', monospace;
-    font-size: 15px; font-weight: 500; letter-spacing: -0.3px;
-  }
-  .logo span { color: var(--accent); }
-  .nav-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px; color: var(--muted);
-    letter-spacing: 1.5px; text-transform: uppercase;
-  }
+  nav { position:fixed; top:0; left:0; right:0; padding:22px 48px; display:flex; justify-content:space-between; align-items:center; z-index:100; border-bottom:1px solid var(--border); backdrop-filter:blur(24px); background:rgba(5,5,8,0.85); }
+  .logo { font-family:'DM Mono',monospace; font-size:15px; font-weight:500; }
+  .logo span { color:var(--accent); }
+  .nav-cta { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; color:white; text-decoration:none; background:linear-gradient(135deg,var(--accent),var(--accent2)); padding:10px 20px; border-radius:6px; box-shadow:0 0 20px rgba(255,77,28,0.25); transition:all .2s; }
+  .nav-cta:hover { transform:translateY(-1px); box-shadow:0 0 32px rgba(255,77,28,0.45); }
 
   /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: flex-start;
-    padding: 130px 48px 80px;
-    position: relative; overflow: hidden;
-    max-width: 900px;
-  }
+  .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding:130px 48px 80px; position:relative; overflow:hidden; max-width:900px; }
+  .hero-glow { position:absolute; top:15%; right:-15%; width:700px; height:700px; background:radial-gradient(circle,rgba(255,77,28,0.09) 0%,transparent 65%); pointer-events:none; animation:breathe 5s ease-in-out infinite; }
+  .hero-glow2 { position:absolute; bottom:5%; left:-10%; width:500px; height:500px; background:radial-gradient(circle,rgba(168,216,240,0.06) 0%,transparent 65%); pointer-events:none; animation:breathe 7s ease-in-out infinite reverse; }
+  @keyframes breathe { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.08)} }
 
-  .hero-glow {
-    position: absolute; top: 15%; right: -15%;
-    width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(255,77,28,0.09) 0%, transparent 65%);
-    pointer-events: none; animation: breathe 5s ease-in-out infinite;
-  }
-  .hero-glow2 {
-    position: absolute; bottom: 5%; left: -10%;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(168,216,240,0.06) 0%, transparent 65%);
-    pointer-events: none; animation: breathe 7s ease-in-out infinite reverse;
-  }
-  @keyframes breathe {
-    0%,100% { opacity:1; transform:scale(1); }
-    50% { opacity:0.5; transform:scale(1.08); }
-  }
+  .hero-eyebrow { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2.5px; color:var(--accent); text-transform:uppercase; margin-bottom:36px; display:flex; align-items:center; gap:10px; animation:fadeUp .5s ease both; }
+  .live-dot { width:6px; height:6px; background:var(--accent); border-radius:50%; animation:blink 1.4s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
 
-  .hero-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px; letter-spacing: 2.5px; color: var(--accent);
-    text-transform: uppercase; margin-bottom: 36px;
-    display: flex; align-items: center; gap: 10px;
-    animation: fadeUp 0.5s ease both;
-  }
-  .live-dot {
-    width: 6px; height: 6px; background: var(--accent);
-    border-radius: 50%; animation: blink 1.4s infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+  h1 { font-size:clamp(54px,8vw,104px); font-weight:700; line-height:.93; letter-spacing:-4px; animation:fadeUp .5s .08s ease both; }
+  h1 .ice-text { display:inline-block; position:relative; background:linear-gradient(135deg,#0ea5e9 0%,#38bdf8 30%,#bae6fd 55%,#0ea5e9 80%,#7dd3fc 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:iceGlow 4s ease-in-out infinite alternate; }
+  @keyframes iceGlow { 0%{filter:drop-shadow(0 0 20px rgba(14,165,233,0.7)) drop-shadow(0 0 6px rgba(186,230,253,0.5))} 100%{filter:drop-shadow(0 0 28px rgba(56,189,248,0.95)) drop-shadow(0 0 10px rgba(186,230,253,0.75))} }
+  h1 .hot-ones { display:inline-block; position:relative; background:linear-gradient(135deg,#ff4d1c 0%,#ff8c00 45%,#ffb347 75%,#ff4d1c 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:flamePulse 2.5s ease-in-out infinite; }
+  h1 .hot-ones::before { content:''; position:absolute; left:-8px; right:-8px; top:-4px; bottom:-4px; background:radial-gradient(ellipse,rgba(255,120,20,0.12) 0%,transparent 70%); border-radius:8px; animation:warmGlow 2.5s ease-in-out infinite; z-index:-1; }
+  @keyframes warmGlow { 0%,100%{opacity:.6} 50%{opacity:1} }
+  @keyframes flamePulse { 0%,100%{filter:drop-shadow(0 0 22px rgba(255,100,20,0.65)) drop-shadow(0 0 5px rgba(255,180,50,0.4))} 50%{filter:drop-shadow(0 0 38px rgba(255,120,20,0.9)) drop-shadow(0 0 10px rgba(255,200,60,0.65))} }
 
-  h1 {
-    font-size: clamp(54px, 8vw, 104px);
-    font-weight: 700; line-height: 0.93;
-    letter-spacing: -4px;
-    animation: fadeUp 0.5s 0.08s ease both;
-  }
+  .hero-sub { font-size:18px; color:var(--muted); margin-top:36px; max-width:480px; line-height:1.7; font-weight:300; animation:fadeUp .5s .16s ease both; }
+  .try-btn { margin-top:48px; display:inline-flex; align-items:center; gap:12px; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; padding:20px 44px; border-radius:6px; border:none; cursor:none; font-family:'DM Sans',sans-serif; font-weight:700; font-size:17px; box-shadow:0 0 48px rgba(255,77,28,0.28); transition:all .3s; animation:fadeUp .5s .24s ease both, btnPulse 2.8s 1s ease-in-out infinite; }
+  .try-btn:hover { transform:translateY(-3px); box-shadow:0 10px 64px rgba(255,77,28,0.55); animation:none; }
+  @keyframes btnPulse { 0%,100%{box-shadow:0 0 48px rgba(255,77,28,0.28)} 50%{box-shadow:0 0 72px rgba(255,77,28,0.55),0 0 120px rgba(255,140,0,0.2)} }
+  .try-btn .btn-arrow { transition:transform .25s; font-size:20px; }
+  .try-btn:hover .btn-arrow { transform:translateX(4px); }
+  .hero-footnote { margin-top:20px; font-size:13px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:.5px; animation:fadeUp .5s .3s ease both; }
 
-  h1 .ice-text {
-    display: inline-block; position: relative;
-    background: linear-gradient(135deg, #cce8f4 0%, #e8f6ff 35%, #9ecfe8 60%, #b8e0f5 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 14px rgba(180,225,245,0.45));
-    opacity: 0.7;
-  }
-  h1 .ice-text::after {
-    content: '';
-    position: absolute; left: 0; bottom: -3px; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #9ecfe8, #cce8f4, transparent);
-    opacity: 0.35;
-  }
-
-  h1 .hot-ones {
-    display: inline-block; position: relative;
-    background: linear-gradient(135deg, #ff4d1c 0%, #ff8c00 45%, #ffb347 75%, #ff4d1c 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 22px rgba(255,100,20,0.65)) drop-shadow(0 0 5px rgba(255,180,50,0.4));
-    animation: flamePulse 2.5s ease-in-out infinite, flameShift 3s linear infinite;
-  }
-  @keyframes flamePulse {
-    0%,100% { filter: drop-shadow(0 0 22px rgba(255,100,20,0.65)) drop-shadow(0 0 5px rgba(255,180,50,0.4)); }
-    50% { filter: drop-shadow(0 0 38px rgba(255,120,20,0.9)) drop-shadow(0 0 10px rgba(255,200,60,0.65)); }
-  }
-  @keyframes flameShift {
-    0% { background-position: 0% center; }
-    100% { background-position: 200% center; }
-  }
-
-  .hero-sub {
-    font-size: 18px; color: var(--muted); margin-top: 36px;
-    max-width: 480px; line-height: 1.7; font-weight: 300;
-    animation: fadeUp 0.5s 0.16s ease both;
-  }
-
-  .try-btn {
-    margin-top: 48px;
-    display: inline-flex; align-items: center; gap: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: white; padding: 20px 44px;
-    border-radius: 6px; border: none; cursor: none;
-    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 17px;
-    letter-spacing: 0.2px;
-    box-shadow: 0 0 48px rgba(255,77,28,0.28);
-    transition: all 0.3s;
-    animation: fadeUp 0.5s 0.24s ease both;
-  }
-  .try-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 64px rgba(255,77,28,0.45);
-  }
-  .try-btn .btn-arrow { transition: transform 0.25s; font-size: 20px; }
-  .try-btn:hover .btn-arrow { transform: translateX(4px); }
-
-  .hero-footnote {
-    margin-top: 20px; font-size: 13px; color: var(--muted);
-    font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
-    animation: fadeUp 0.5s 0.3s ease both;
-  }
+  /* TOOLS */
+  .tools { border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:20px 48px; background:var(--surface); display:flex; align-items:center; gap:48px; overflow:hidden; }
+  .tools-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
+  .tools-list { display:flex; align-items:center; gap:40px; flex-wrap:wrap; }
+  .tool-item { font-family:'DM Mono',monospace; font-size:12px; color:var(--muted); letter-spacing:1px; opacity:.6; transition:opacity .2s; white-space:nowrap; }
+  .tool-item:hover { opacity:1; }
 
   /* HOW IT WORKS */
-  .how {
-    padding: 100px 48px;
-    border-top: 1px solid var(--border);
-  }
-  .how-inner { max-width: 900px; }
-  .how-label {
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    letter-spacing: 2.5px; color: var(--accent); text-transform: uppercase;
-    margin-bottom: 56px;
-  }
-  .steps {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
-  }
-  .step {
-    padding: 40px 36px; background: var(--card);
-    border-right: 1px solid var(--border); transition: background 0.25s;
-  }
-  .step:last-child { border-right: none; }
-  .step:hover { background: #131320; }
-  .step-n {
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    color: var(--muted); letter-spacing: 2px; margin-bottom: 20px;
-  }
-  .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
-  .step p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .how { padding:100px 48px; border-top:1px solid var(--border); }
+  .how-inner { max-width:900px; }
+  .how-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2.5px; color:var(--accent); text-transform:uppercase; margin-bottom:56px; }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .step { padding:40px 36px; background:var(--card); border-right:1px solid var(--border); transition:background .25s; }
+  .step:last-child { border-right:none; }
+  .step:hover { background:#131320; }
+  .step-n { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:2px; margin-bottom:20px; }
+  .step h3 { font-size:18px; font-weight:600; margin-bottom:10px; }
+  .step p { font-size:14px; color:var(--muted); line-height:1.7; }
 
-  /* QUALIFIER MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(5,5,8,0.92);
-    backdrop-filter: blur(12px);
-    z-index: 500;
-    display: flex; align-items: center; justify-content: center;
-    padding: 24px;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  /* FAQ */
+  .faq { padding:100px 48px; border-top:1px solid var(--border); }
+  .faq-inner { max-width:700px; }
+  .faq-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2.5px; color:var(--accent); text-transform:uppercase; margin-bottom:48px; }
+  .faq-item { border-bottom:1px solid var(--border); }
+  .faq-q { width:100%; background:none; border:none; color:var(--text); font-family:'DM Sans',sans-serif; font-size:17px; font-weight:500; padding:24px 0; text-align:left; cursor:none; display:flex; justify-content:space-between; align-items:center; gap:16px; transition:color .2s; }
+  .faq-q:hover { color:var(--accent); }
+  .faq-icon { font-size:20px; color:var(--muted); transition:transform .3s,color .2s; flex-shrink:0; }
+  .faq-item.open .faq-icon { transform:rotate(45deg); color:var(--accent); }
+  .faq-a { font-size:15px; color:var(--muted); line-height:1.75; max-height:0; overflow:hidden; transition:max-height .4s ease,padding .3s; }
+  .faq-item.open .faq-a { max-height:200px; padding-bottom:24px; }
 
-  .modal {
-    background: var(--card);
-    border: 1px solid rgba(255,77,28,0.15);
-    border-radius: 20px; padding: 56px 52px;
-    max-width: 560px; width: 100%;
-    position: relative;
-    box-shadow: 0 0 80px rgba(255,77,28,0.08);
-    transform: translateY(16px); transition: transform 0.3s;
-  }
-  .modal-overlay.open .modal { transform: translateY(0); }
+  /* MODAL */
+  .modal-overlay { position:fixed; inset:0; background:rgba(5,5,8,0.92); backdrop-filter:blur(12px); z-index:500; display:flex; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--card); border:1px solid rgba(255,77,28,0.15); border-radius:20px; padding:48px 52px 44px; max-width:560px; width:100%; position:relative; box-shadow:0 0 80px rgba(255,77,28,0.08); transform:translateY(16px); transition:transform .3s; overflow:hidden; }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-close { position:absolute; top:20px; right:24px; background:none; border:none; color:var(--muted); font-size:22px; cursor:none; transition:color .2s; line-height:1; }
+  .modal-close:hover { color:var(--text); }
 
-  .modal-close {
-    position: absolute; top: 20px; right: 24px;
-    background: none; border: none; color: var(--muted);
-    font-size: 22px; cursor: none; transition: color 0.2s; line-height: 1;
+  /* PROGRESS BAR */
+  .progress-wrap { margin-bottom:36px; }
+  .progress-track { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .progress-fill { height:100%; width:0%; border-radius:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .5s cubic-bezier(0.34,1.2,0.64,1); box-shadow:0 0 8px rgba(255,77,28,0.5); }
+  .progress-fill.complete { animation:fillPulse .6s ease forwards; }
+  @keyframes fillPulse {
+    0%   { box-shadow:0 0 8px rgba(255,77,28,0.5); }
+    40%  { box-shadow:0 0 24px rgba(255,140,0,0.9), 0 0 48px rgba(255,77,28,0.4); }
+    100% { box-shadow:0 0 8px rgba(255,77,28,0.5); }
   }
-  .modal-close:hover { color: var(--text); }
+  .progress-meta { display:flex; justify-content:space-between; margin-top:8px; }
+  .progress-step { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; }
+  .progress-pct  { font-family:'DM Mono',monospace; font-size:10px; color:var(--accent); }
 
-  .modal-progress {
-    display: flex; gap: 6px; margin-bottom: 40px;
-  }
-  .progress-dot {
-    flex: 1; height: 3px; border-radius: 2px;
-    background: var(--border); transition: background 0.4s;
-  }
-  .progress-dot.done { background: var(--accent); }
-  .progress-dot.active { background: rgba(255,77,28,0.4); }
+  /* BACK BUTTON */
+  .modal-back { display:none; background:none; border:none; color:var(--muted); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:none; margin-bottom:20px; transition:color .2s; }
+  .modal-back:hover { color:var(--text); }
+  .modal-back.visible { display:inline-flex; align-items:center; gap:6px; }
 
-  .modal-step { display: none; }
-  .modal-step.active { display: block; }
+  /* QUESTIONS */
+  .modal-step { display:none; }
+  .modal-step.active { display:block; animation:fadeUp .3s ease both; }
+  .modal-q { font-size:22px; font-weight:600; line-height:1.3; margin-bottom:8px; letter-spacing:-.5px; }
+  .modal-sub { font-size:14px; color:var(--muted); margin-bottom:28px; line-height:1.6; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .opt { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:16px 20px; font-size:15px; color:var(--text); cursor:none; text-align:left; transition:all .2s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:space-between; }
+  .opt:hover { border-color:rgba(255,77,28,0.35); background:rgba(255,77,28,0.05); transform:translateX(4px); }
+  .opt .opt-arrow { color:var(--muted); font-size:16px; transition:all .2s; flex-shrink:0; }
+  .opt:hover .opt-arrow { color:var(--accent); transform:translateX(3px); }
 
-  .modal-q {
-    font-size: 22px; font-weight: 600; line-height: 1.3;
-    margin-bottom: 8px; letter-spacing: -0.5px;
-  }
-  .modal-sub {
-    font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.6;
-  }
+  /* LOADER (text only) */
+  .text-loader { display:none; text-align:center; padding:40px 0; }
+  .text-loader.active { display:block; animation:fadeUp .3s ease both; }
+  .loader-status { font-family:'DM Mono',monospace; font-size:13px; color:var(--accent); letter-spacing:1px; min-height:22px; margin-bottom:8px; }
+  .loader-sub { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; }
+  .loader-dots { display:inline-flex; gap:6px; margin-top:24px; }
+  .loader-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); opacity:.2; animation:dotPulse 1.2s ease-in-out infinite; }
+  .loader-dot:nth-child(2) { animation-delay:.2s; }
+  .loader-dot:nth-child(3) { animation-delay:.4s; }
+  @keyframes dotPulse { 0%,100%{opacity:.2;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
 
-  .options { display: flex; flex-direction: column; gap: 10px; }
-  .opt {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px 20px;
-    font-size: 15px; color: var(--text);
-    cursor: none; text-align: left;
-    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .opt:hover {
-    border-color: rgba(255,77,28,0.35);
-    background: rgba(255,77,28,0.05);
-    transform: translateX(4px);
-  }
-  .opt .opt-arrow { color: var(--muted); font-size: 16px; transition: all 0.2s; flex-shrink: 0; }
-  .opt:hover .opt-arrow { color: var(--accent); transform: translateX(3px); }
-
-  /* RESULT SCREENS */
-  .result-screen { display: none; text-align: center; }
-  .result-screen.active { display: block; animation: fadeUp 0.4s ease both; }
-
-  .result-emoji { font-size: 52px; margin-bottom: 20px; }
-  .result-title { font-size: 26px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
-  .result-desc { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 32px; max-width: 380px; margin-left: auto; margin-right: auto; }
-
-  .result-cta {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 16px 36px; border-radius: 8px; border: none;
-    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
-    cursor: none; text-decoration: none; transition: all 0.25s;
-    width: 100%; justify-content: center;
-  }
-  .cta-fire {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: white; box-shadow: 0 0 40px rgba(255,77,28,0.3);
-  }
-  .cta-fire:hover { transform: translateY(-2px); box-shadow: 0 8px 56px rgba(255,77,28,0.5); }
-  .cta-warm {
-    background: rgba(255,140,0,0.08);
-    border: 1px solid rgba(255,140,0,0.25); color: #ff8c00;
-  }
-  .cta-warm:hover { background: rgba(255,140,0,0.14); transform: translateY(-2px); }
-  .cta-cold {
-    background: rgba(168,216,240,0.06);
-    border: 1px solid rgba(168,216,240,0.18); color: #9ecfe8;
-  }
-  .cta-cold:hover { background: rgba(168,216,240,0.11); transform: translateY(-2px); }
-
-  .result-restart {
-    display: block; margin: 16px auto 0;
-    background: none; border: none;
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    color: var(--muted); cursor: none; letter-spacing: 1px;
-    transition: color 0.2s; text-transform: uppercase;
-  }
-  .result-restart:hover { color: var(--text); }
+  /* RESULTS */
+  .result-screen { display:none; text-align:center; }
+  .result-screen.active { display:block; animation:fadeUp .4s ease both; }
+  .result-emoji { font-size:52px; margin-bottom:20px; }
+  .result-title { font-size:26px; font-weight:700; margin-bottom:12px; letter-spacing:-.5px; }
+  .result-desc { font-size:15px; color:var(--muted); line-height:1.75; margin-bottom:32px; max-width:380px; margin-left:auto; margin-right:auto; }
+  .result-cta { display:inline-flex; align-items:center; gap:10px; padding:16px 36px; border-radius:8px; border:none; font-family:'DM Sans',sans-serif; font-weight:700; font-size:16px; cursor:none; text-decoration:none; transition:all .25s; width:100%; justify-content:center; }
+  .cta-fire { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; box-shadow:0 0 40px rgba(255,77,28,0.3); }
+  .cta-fire:hover { transform:translateY(-2px); box-shadow:0 8px 56px rgba(255,77,28,0.5); }
+  .cta-warm { background:rgba(255,140,0,0.08); border:1px solid rgba(255,140,0,0.25); color:#ff8c00; }
+  .cta-warm:hover { background:rgba(255,140,0,0.14); transform:translateY(-2px); }
+  .cta-cold { background:rgba(168,216,240,0.06); border:1px solid rgba(168,216,240,0.18); color:#9ecfe8; }
+  .cta-cold:hover { background:rgba(168,216,240,0.11); transform:translateY(-2px); }
+  .result-restart { display:block; margin:16px auto 0; background:none; border:none; font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); cursor:none; letter-spacing:1px; transition:color .2s; text-transform:uppercase; }
+  .result-restart:hover { color:var(--text); }
 
   /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 28px 48px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .footer-logo { font-family: 'DM Mono', monospace; font-size: 13px; }
-  .footer-logo span { color: var(--accent); }
-  .footer-copy { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+  footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; justify-content:space-between; align-items:center; }
+  .footer-logo { font-family:'DM Mono',monospace; font-size:13px; }
+  .footer-logo span { color:var(--accent); }
+  .footer-copy { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:.5px; }
 
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(20px); }
-    to { opacity:1; transform:translateY(0); }
-  }
-  .reveal { opacity:0; transform:translateY(24px); transition: all 0.6s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(24px); transition:all .6s ease; }
   .reveal.visible { opacity:1; transform:translateY(0); }
 
-  @media (max-width: 768px) {
-    nav { padding: 18px 24px; }
-    .nav-badge { display: none; }
-    .hero { padding: 110px 24px 60px; }
-    h1 { letter-spacing: -2px; }
-    .how { padding: 72px 24px; }
-    .steps { grid-template-columns: 1fr; }
-    .step { border-right: none; border-bottom: 1px solid var(--border); }
-    .step:last-child { border-bottom: none; }
-    .modal { padding: 40px 28px; }
-    .modal-q { font-size: 19px; }
-    footer { padding: 24px; flex-direction: column; gap: 10px; text-align: center; }
+  @media (max-width:768px) {
+    nav { padding:18px 24px; }
+    .hero { padding:110px 24px 60px; }
+    h1 { letter-spacing:-2px; }
+    .tools { padding:16px 24px; gap:24px; }
+    .how,.faq { padding:72px 24px; }
+    .steps { grid-template-columns:1fr; }
+    .step { border-right:none; border-bottom:1px solid var(--border); }
+    .step:last-child { border-bottom:none; }
+    .modal { padding:40px 24px 36px; border-radius:16px 16px 0 0; position:fixed; bottom:0; left:0; right:0; max-width:100%; transform:translateY(100%); }
+    .modal-overlay.open .modal { transform:translateY(0); }
+    .modal-overlay { align-items:flex-end; padding:0; }
+    footer { padding:24px; flex-direction:column; gap:10px; text-align:center; }
   }
 </style>
 </head>
@@ -372,166 +185,183 @@
 <div class="cursor-ring" id="cursorRing"></div>
 <div class="grid-bg"></div>
 
-<!-- NAV -->
 <nav>
   <div class="logo">Only<span>Hot</span>Leads</div>
-  <div class="nav-badge">AI Lead Qualification</div>
+  <a href="https://calendly.com/YOURLINK" target="_blank" class="nav-cta">Book a call</a>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-glow"></div>
   <div class="hero-glow2"></div>
-
-  <div class="hero-eyebrow">
-    <span class="live-dot"></span>
-    Powered by AI
-  </div>
-
+  <div class="hero-eyebrow"><span class="live-dot"></span>Powered by AI</div>
   <h1>
     Stop chasing<br>
     <span class="ice-text">cold leads.</span><br>
     Let the <span class="hot-ones">hot ones</span><br>
     come your way.
   </h1>
-
-  <p class="hero-sub">
-    Your pipeline is frozen. Our AI qualifies every inbound lead 24/7 — so your team only talks to people ready to buy.
-  </p>
-
-  <button class="try-btn" id="openQualifier">
-    Try it on yourself <span class="btn-arrow">→</span>
-  </button>
+  <p class="hero-sub">Your pipeline is frozen. Our AI qualifies every inbound lead 24/7 — so your team only talks to people ready to buy.</p>
+  <button class="try-btn" id="openQualifier">Try it on yourself <span class="btn-arrow">→</span></button>
   <p class="hero-footnote">Takes 60 seconds · No signup needed</p>
 </section>
 
-<!-- HOW IT WORKS -->
+<div class="tools reveal">
+  <div class="tools-label">Integrates with</div>
+  <div class="tools-list">
+    <span class="tool-item">HubSpot</span>
+    <span class="tool-item">Notion</span>
+    <span class="tool-item">Airtable</span>
+    <span class="tool-item">Zapier</span>
+    <span class="tool-item">n8n</span>
+    <span class="tool-item">Pipedrive</span>
+    <span class="tool-item">Slack</span>
+  </div>
+</div>
+
 <section class="how">
   <div class="how-inner">
     <div class="how-label reveal">How it works</div>
     <div class="steps reveal">
-      <div class="step">
-        <div class="step-n">01</div>
-        <h3>Connect your leads</h3>
-        <p>Link your website form, CRM, or ad campaigns. Works with HubSpot, Notion, Airtable, and more.</p>
+      <div class="step"><div class="step-n">01</div><h3>Connect your leads</h3><p>Link your website form, CRM, or ad campaigns. Works with HubSpot, Notion, Airtable, and more.</p></div>
+      <div class="step"><div class="step-n">02</div><h3>AI qualifies 24/7</h3><p>Every lead gets scored on intent, budget fit, and urgency — automatically, while you sleep.</p></div>
+      <div class="step"><div class="step-n">03</div><h3>Only hot ones reach you</h3><p>You get a clear score + summary. Cold leads go to nurture. Hot leads go straight to your inbox.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="faq-inner">
+    <div class="faq-label reveal">FAQ</div>
+    <div class="reveal">
+      <div class="faq-item">
+        <button class="faq-q">How long does setup take? <span class="faq-icon">+</span></button>
+        <div class="faq-a">Most clients are up and running within 48 hours. I handle the entire setup — you just connect your tools and define your ideal client profile. That's it.</div>
       </div>
-      <div class="step">
-        <div class="step-n">02</div>
-        <h3>AI qualifies 24/7</h3>
-        <p>Every lead gets scored on intent, budget fit, and urgency — automatically, while you sleep.</p>
+      <div class="faq-item">
+        <button class="faq-q">What tools does it integrate with? <span class="faq-icon">+</span></button>
+        <div class="faq-a">HubSpot, Pipedrive, Notion, Airtable, Zapier, n8n, Slack, and most form tools. If you use something else, reach out — custom integrations are possible.</div>
       </div>
-      <div class="step">
-        <div class="step-n">03</div>
-        <h3>Only hot ones reach you</h3>
-        <p>You get a clear score + summary. Cold leads go to nurture. Hot leads go straight to your inbox.</p>
+      <div class="faq-item">
+        <button class="faq-q">What if I'm not satisfied? <span class="faq-icon">+</span></button>
+        <div class="faq-a">If the system isn't delivering results in the first 30 days, I'll refund you in full. No questions asked. I'm building long-term relationships, not one-off sales.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-logo">Only<span>Hot</span>Leads</div>
-  <div class="footer-copy">© 2025 · Built with AI</div>
+  <div class="footer-copy">© 2025 · Built by a real human, not an agency</div>
 </footer>
 
-<!-- QUALIFIER MODAL -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
+  <div class="modal" id="modalBox">
     <button class="modal-close" id="closeModal">✕</button>
 
-    <div class="modal-progress">
-      <div class="progress-dot active" data-i="0"></div>
-      <div class="progress-dot" data-i="1"></div>
-      <div class="progress-dot" data-i="2"></div>
-      <div class="progress-dot" data-i="3"></div>
-      <div class="progress-dot" data-i="4"></div>
-    </div>
-
-    <!-- Q1 -->
-    <div class="modal-step active" data-step="0">
-      <div class="modal-q">What's your biggest sales headache right now?</div>
-      <div class="modal-sub">Be honest — this helps us figure out if we can actually help.</div>
-      <div class="options">
-        <button class="opt" data-score="3">We're drowning in unqualified leads <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="2">Our close rate is too low <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="1">We don't get enough leads yet <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="0">Just exploring for now <span class="opt-arrow">→</span></button>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-meta">
+        <span class="progress-step" id="progressStep">Question 1 of 5</span>
+        <span class="progress-pct" id="progressPct">0%</span>
       </div>
     </div>
 
-    <!-- Q2 -->
-    <div class="modal-step" data-step="1">
-      <div class="modal-q">How many inbound leads do you get per month?</div>
-      <div class="modal-sub">A rough estimate is fine.</div>
+    <button class="modal-back" id="backBtn">← Back</button>
+
+    <!-- Q1 -->
+    <div class="modal-step active" data-step="0">
+      <div class="modal-q">What's slowing your sales down?</div>
+      <div class="modal-sub">Pick what resonates most with your situation.</div>
       <div class="options">
-        <button class="opt" data-score="3">200+ leads / month <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="2">50–200 leads / month <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="1">Under 50 leads / month <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="0">We don't really track this <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="3">Too much time wasted on leads that go nowhere <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">We get leads but struggle to close them <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">Not enough leads coming in yet <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">Nothing specific, just exploring <span class="opt-arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- Q2 — small numbers first -->
+    <div class="modal-step" data-step="1">
+      <div class="modal-q">How many inbound leads per month?</div>
+      <div class="modal-sub">A rough estimate works just fine.</div>
+      <div class="options">
+        <button class="opt" data-score="0">Barely any right now <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">Under 20 / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">20–50 / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="3">50+ / month <span class="opt-arrow">→</span></button>
       </div>
     </div>
 
     <!-- Q3 -->
     <div class="modal-step" data-step="2">
-      <div class="modal-q">Do you have a qualification process today?</div>
-      <div class="modal-sub">How are you filtering leads right now?</div>
+      <div class="modal-q">How are you handling qualification today?</div>
+      <div class="modal-sub">No right or wrong answer here.</div>
       <div class="options">
-        <button class="opt" data-score="3">All manual — it's chaos <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="2">Something basic, but it's not working <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="1">We have a system but want better <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="0">Not sure what that means <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="3">Manually — it's taking up too much time <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">We have a basic process but it's not efficient <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">We have something decent, just want to improve <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">We haven't really thought about it yet <span class="opt-arrow">→</span></button>
       </div>
     </div>
 
     <!-- Q4 -->
     <div class="modal-step" data-step="3">
-      <div class="modal-q">What's your timeline to fix this?</div>
-      <div class="modal-sub">No wrong answer here.</div>
+      <div class="modal-q">How much is this slowing you down?</div>
+      <div class="modal-sub">This helps me understand what solution fits best.</div>
       <div class="options">
-        <button class="opt" data-score="3">ASAP — this is costing us money <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="2">Next 1–3 months <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="1">No rush, planning ahead <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="0">Just curious for now <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="3">A lot — it's affecting revenue right now <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">Noticeably — I want to fix it this quarter <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">A little — it's on my radar but not urgent <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">Not much — just curious what's out there <span class="opt-arrow">→</span></button>
       </div>
     </div>
 
-    <!-- Q5 -->
+    <!-- Q5 — one-shot investment, revised pricing -->
     <div class="modal-step" data-step="4">
-      <div class="modal-q">What's your monthly budget for automation?</div>
-      <div class="modal-sub">This helps us recommend the right setup for you.</div>
+      <div class="modal-q">What could you invest for a one-time setup?</div>
+      <div class="modal-sub">This is a one-shot solution — no recurring fees.</div>
       <div class="options">
-        <button class="opt" data-score="3">$500+ / month <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="2">$200–$500 / month <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="1">Under $200 / month <span class="opt-arrow">→</span></button>
-        <button class="opt" data-score="0">No budget set yet <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">Under $300 <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">$300–$700 <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">$700–$1,200 <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="3">$1,200+ <span class="opt-arrow">→</span></button>
       </div>
     </div>
 
-    <!-- RESULT: HOT 🔥 -->
+    <!-- TEXT LOADER -->
+    <div class="text-loader" id="textLoader">
+      <div class="loader-status" id="loaderStatus">Initialising analysis...</div>
+      <div class="loader-sub">Please wait</div>
+      <div class="loader-dots">
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
     <div class="result-screen" id="result-hot">
       <div class="result-emoji">🔥</div>
       <div class="result-title">You're a hot lead.</div>
-      <div class="result-desc">You've got the pain, the volume, and the urgency. This is exactly what OnlyHotLeads is built for. Let's talk — I'll map out a custom setup in 20 minutes.</div>
-      <a href="https://calendly.com/onlyhotleads" target="_blank" class="result-cta cta-fire">Book a call — let's do this →</a>
+      <div class="result-desc">Real problem, real urgency, real budget. This is exactly the situation OnlyHotLeads was built for. Let's get on a quick call — I'll show you a custom setup in 20 minutes, no fluff.</div>
+      <a href="https://calendly.com/YOURLINK" target="_blank" class="result-cta cta-fire">Book a call — let's do this →</a>
       <button class="result-restart">← Restart</button>
     </div>
 
-    <!-- RESULT: WARM 🌤 -->
     <div class="result-screen" id="result-warm">
       <div class="result-emoji">🌤️</div>
       <div class="result-title">You're a warm lead.</div>
-      <div class="result-desc">You're heading in the right direction. Drop me an email and I'll send you a free custom quote with exactly how this would work for your business.</div>
-      <a href="mailto:togatacorporation@gmail.com?subject=Free Quote — OnlyHotLeads" class="result-cta cta-warm">Get my free quote by email →</a>
+      <div class="result-desc">You've got the right problem, timing just isn't perfect yet. Send me an email and I'll put together a free quote tailored to your exact situation — no commitment needed.</div>
+      <a href="mailto:YOU@EMAIL.COM?subject=Free Quote — OnlyHotLeads" class="result-cta cta-warm">Get my free quote by email →</a>
       <button class="result-restart">← Restart</button>
     </div>
 
-    <!-- RESULT: COLD 🧊 -->
     <div class="result-screen" id="result-cold">
       <div class="result-emoji">🧊</div>
       <div class="result-title">You're a cold lead — for now.</div>
-      <div class="result-desc">Not quite the right timing yet — and that's totally fine. Follow along on LinkedIn and reach out when you're ready.</div>
-      <a href="https://www.linkedin.com/in/thibaud-brisson/" target="_blank" class="result-cta cta-cold">Follow me on LinkedIn →</a>
+      <div class="result-desc">The timing isn't right yet and that's totally fine. Stay connected on LinkedIn — when the pain gets real, you'll know where to find me.</div>
+      <a href="https://linkedin.com/in/YOURPROFILE" target="_blank" class="result-cta cta-cold">Follow me on LinkedIn →</a>
       <button class="result-restart">← Restart</button>
     </div>
 
@@ -539,78 +369,156 @@
 </div>
 
 <script>
-  // CURSOR
-  const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursorRing');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+// CURSOR
+const cursor = document.getElementById('cursor'), ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+(function animRing(){ rx+=(mx-rx)*.13; ry+=(my-ry)*.13; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); })();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ cursor.style.width='5px'; cursor.style.height='5px'; ring.style.width='52px'; ring.style.height='52px'; });
+  el.addEventListener('mouseleave',()=>{ cursor.style.width='10px'; cursor.style.height='10px'; ring.style.width='34px'; ring.style.height='34px'; });
+});
+
+// SCROLL REVEAL
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{ if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'),i*100); });
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// FAQ
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item = btn.parentElement, wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!wasOpen) item.classList.add('open');
   });
-  (function animRing() {
-    rx += (mx - rx) * 0.13; ry += (my - ry) * 0.13;
-    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-    requestAnimationFrame(animRing);
-  })();
-  document.querySelectorAll('a, button').forEach(el => {
-    el.addEventListener('mouseenter', () => { cursor.style.width='5px'; cursor.style.height='5px'; ring.style.width='52px'; ring.style.height='52px'; });
-    el.addEventListener('mouseleave', () => { cursor.style.width='10px'; cursor.style.height='10px'; ring.style.width='34px'; ring.style.height='34px'; });
-  });
+});
 
-  // SCROLL REVEAL
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => { if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 100); });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+// QUALIFIER STATE
+const overlay       = document.getElementById('modalOverlay');
+const steps         = document.querySelectorAll('.modal-step');
+const progressFill  = document.getElementById('progressFill');
+const progressStep  = document.getElementById('progressStep');
+const progressPct   = document.getElementById('progressPct');
+const progressWrap  = document.getElementById('progressWrap');
+const backBtn       = document.getElementById('backBtn');
+const textLoader    = document.getElementById('textLoader');
+const loaderStatus  = document.getElementById('loaderStatus');
+const resultScreens = {
+  hot:  document.getElementById('result-hot'),
+  warm: document.getElementById('result-warm'),
+  cold: document.getElementById('result-cold')
+};
+const TOTAL = steps.length; // 5
+let currentStep = 0;
+let scores = [null, null, null, null, null]; // per-step scores
 
-  // QUALIFIER
-  const overlay  = document.getElementById('modalOverlay');
-  const steps    = document.querySelectorAll('.modal-step');
-  const dots     = document.querySelectorAll('.progress-dot');
-  const resultScreens = {
-    hot:  document.getElementById('result-hot'),
-    warm: document.getElementById('result-warm'),
-    cold: document.getElementById('result-cold')
-  };
-  let currentStep = 0, totalScore = 0;
+function totalScore(){ return scores.reduce((a,v)=> a + (v||0), 0); }
 
-  function openModal()  { overlay.classList.add('open');    document.body.style.overflow = 'hidden'; }
-  function closeModal() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+function updateProgress(step){
+  const pct = Math.round((step / TOTAL) * 100);
+  progressFill.style.width = pct + '%';
+  progressStep.textContent = step < TOTAL ? 'Question '+(step+1)+' of '+TOTAL : 'Complete';
+  progressPct.textContent = pct + '%';
+  backBtn.classList.toggle('visible', step > 0);
+}
 
-  function resetModal() {
-    currentStep = 0; totalScore = 0;
-    steps.forEach(s => s.classList.remove('active'));
-    Object.values(resultScreens).forEach(r => r.classList.remove('active'));
-    steps[0].classList.add('active');
-    dots.forEach((d, i) => { d.classList.remove('done', 'active'); if (i === 0) d.classList.add('active'); });
+function showStep(i){
+  steps.forEach(s=>s.classList.remove('active'));
+  if(i < TOTAL){ steps[i].classList.add('active'); updateProgress(i); }
+}
+
+function openModal(){ overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+
+function resetModal(){
+  currentStep = 0;
+  scores = [null,null,null,null,null];
+  Object.values(resultScreens).forEach(r=>r.classList.remove('active'));
+  textLoader.classList.remove('active');
+  progressFill.classList.remove('complete');
+  progressWrap.style.opacity='1';
+  progressWrap.style.display='';
+  backBtn.classList.remove('visible');
+  showStep(0);
+}
+
+document.getElementById('openQualifier').addEventListener('click',()=>{ resetModal(); openModal(); });
+document.getElementById('closeModal').addEventListener('click', closeModal);
+overlay.addEventListener('click', e=>{ if(e.target===overlay) closeModal(); });
+
+// BACK BUTTON
+backBtn.addEventListener('click',()=>{
+  if(currentStep > 0){
+    scores[currentStep] = null; // clear current step score
+    currentStep--;
+    showStep(currentStep);
   }
+});
 
-  document.getElementById('openQualifier').addEventListener('click', () => { resetModal(); openModal(); });
-  document.getElementById('closeModal').addEventListener('click', closeModal);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+// ANSWER CLICK
+document.querySelectorAll('.opt').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    scores[currentStep] = parseInt(btn.dataset.score);
+    currentStep++;
 
-  document.querySelectorAll('.opt').forEach(btn => {
-    btn.addEventListener('click', () => {
-      totalScore += parseInt(btn.dataset.score);
-      dots[currentStep].classList.remove('active');
-      dots[currentStep].classList.add('done');
-      steps[currentStep].classList.remove('active');
-      currentStep++;
+    if(currentStep < TOTAL){
+      showStep(currentStep);
+    } else {
+      // All done — fill bar to 100%
+      backBtn.classList.remove('visible');
+      progressFill.style.width = '100%';
+      progressStep.textContent = 'Complete';
+      progressPct.textContent = '100%';
+      progressFill.classList.add('complete');
+      steps[currentStep-1].classList.remove('active');
 
-      if (currentStep < steps.length) {
-        steps[currentStep].classList.add('active');
-        dots[currentStep].classList.add('active');
-      } else {
-        dots.forEach(d => d.classList.add('done'));
-        const key = totalScore >= 10 ? 'hot' : totalScore >= 5 ? 'warm' : 'cold';
-        resultScreens[key].classList.add('active');
-      }
-    });
+      // After bar animation, hide bar and show loader
+      setTimeout(()=>{
+        progressWrap.style.transition = 'opacity .4s';
+        progressWrap.style.opacity = '0';
+        setTimeout(()=>{
+          progressWrap.style.display = 'none';
+          runLoader();
+        }, 400);
+      }, 800);
+    }
   });
+});
 
-  document.querySelectorAll('.result-restart').forEach(btn => {
-    btn.addEventListener('click', resetModal);
-  });
+// TEXT LOADER SEQUENCE
+function runLoader(){
+  textLoader.classList.add('active');
+  const msgs = [
+    [0,    'Fetching lead profile data...'],
+    [700,  'Running qualification model...'],
+    [1400, 'Scoring intent signals...'],
+    [2000, 'Analysing budget fit...'],
+    [2600, 'Generating your result...'],
+  ];
+  msgs.forEach(([t,msg])=>{ setTimeout(()=>{ loaderStatus.textContent = msg; }, t); });
+  setTimeout(()=>{
+    textLoader.classList.remove('active');
+    showResult();
+  }, 3200);
+}
+
+function showResult(){
+  const s = totalScore();
+  const key = s >= 10 ? 'hot' : s >= 5 ? 'warm' : 'cold';
+  resultScreens[key].classList.add('active');
+}
+
+// RESTART
+document.querySelectorAll('.result-restart').forEach(btn=>{ btn.addEventListener('click', resetModal); });
+
+// SWIPE TO CLOSE (mobile)
+const modalBox = document.getElementById('modalBox');
+let touchStartY = 0;
+modalBox.addEventListener('touchstart', e=>{ touchStartY = e.touches[0].clientY; },{passive:true});
+modalBox.addEventListener('touchend', e=>{
+  if(e.changedTouches[0].clientY - touchStartY > 80) closeModal();
+},{passive:true});
 </script>
 </body>
 </html>
