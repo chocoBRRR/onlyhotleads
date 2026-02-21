@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OnlyHotLeads — AI Lead Qualification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --surface: #0d0d14;
+    --border: rgba(255,255,255,0.07);
+    --accent: #ff4d1c;
+    --accent2: #ff8c00;
+    --glow: rgba(255,77,28,0.18);
+    --text: #f0eee8;
+    --muted: #5a5963;
+    --card: #0f0f18;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+    min-height: 100vh;
+  }
+
+  /* CURSOR */
+  .cursor {
+    position: fixed; width: 10px; height: 10px;
+    background: var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed; width: 34px; height: 34px;
+    border: 1px solid rgba(255,77,28,0.45); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.12s ease;
+  }
+
+  /* NOISE */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.35;
+  }
+
+  /* GRID */
+  .grid-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,77,28,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,77,28,0.025) 1px, transparent 1px);
+    background-size: 72px 72px;
+    pointer-events: none;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 22px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(24px);
+    background: rgba(5,5,8,0.85);
+  }
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px; font-weight: 500; letter-spacing: -0.3px;
+  }
+  .logo span { color: var(--accent); }
+  .nav-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    padding: 130px 48px 80px;
+    position: relative; overflow: hidden;
+    max-width: 900px;
+  }
+
+  .hero-glow {
+    position: absolute; top: 15%; right: -15%;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(255,77,28,0.09) 0%, transparent 65%);
+    pointer-events: none; animation: breathe 5s ease-in-out infinite;
+  }
+  .hero-glow2 {
+    position: absolute; bottom: 5%; left: -10%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(168,216,240,0.06) 0%, transparent 65%);
+    pointer-events: none; animation: breathe 7s ease-in-out infinite reverse;
+  }
+  @keyframes breathe {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.5; transform:scale(1.08); }
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 2.5px; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 36px;
+    display: flex; align-items: center; gap: 10px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .live-dot {
+    width: 6px; height: 6px; background: var(--accent);
+    border-radius: 50%; animation: blink 1.4s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+  h1 {
+    font-size: clamp(54px, 8vw, 104px);
+    font-weight: 700; line-height: 0.93;
+    letter-spacing: -4px;
+    animation: fadeUp 0.5s 0.08s ease both;
+  }
+
+  h1 .ice-text {
+    display: inline-block; position: relative;
+    background: linear-gradient(135deg, #cce8f4 0%, #e8f6ff 35%, #9ecfe8 60%, #b8e0f5 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 14px rgba(180,225,245,0.45));
+    opacity: 0.7;
+  }
+  h1 .ice-text::after {
+    content: '';
+    position: absolute; left: 0; bottom: -3px; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #9ecfe8, #cce8f4, transparent);
+    opacity: 0.35;
+  }
+
+  h1 .hot-ones {
+    display: inline-block; position: relative;
+    background: linear-gradient(135deg, #ff4d1c 0%, #ff8c00 45%, #ffb347 75%, #ff4d1c 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 22px rgba(255,100,20,0.65)) drop-shadow(0 0 5px rgba(255,180,50,0.4));
+    animation: flamePulse 2.5s ease-in-out infinite, flameShift 3s linear infinite;
+  }
+  @keyframes flamePulse {
+    0%,100% { filter: drop-shadow(0 0 22px rgba(255,100,20,0.65)) drop-shadow(0 0 5px rgba(255,180,50,0.4)); }
+    50% { filter: drop-shadow(0 0 38px rgba(255,120,20,0.9)) drop-shadow(0 0 10px rgba(255,200,60,0.65)); }
+  }
+  @keyframes flameShift {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .hero-sub {
+    font-size: 18px; color: var(--muted); margin-top: 36px;
+    max-width: 480px; line-height: 1.7; font-weight: 300;
+    animation: fadeUp 0.5s 0.16s ease both;
+  }
+
+  .try-btn {
+    margin-top: 48px;
+    display: inline-flex; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white; padding: 20px 44px;
+    border-radius: 6px; border: none; cursor: none;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 17px;
+    letter-spacing: 0.2px;
+    box-shadow: 0 0 48px rgba(255,77,28,0.28);
+    transition: all 0.3s;
+    animation: fadeUp 0.5s 0.24s ease both;
+  }
+  .try-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 64px rgba(255,77,28,0.45);
+  }
+  .try-btn .btn-arrow { transition: transform 0.25s; font-size: 20px; }
+  .try-btn:hover .btn-arrow { transform: translateX(4px); }
+
+  .hero-footnote {
+    margin-top: 20px; font-size: 13px; color: var(--muted);
+    font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
+    animation: fadeUp 0.5s 0.3s ease both;
+  }
+
+  /* HOW IT WORKS */
+  .how {
+    padding: 100px 48px;
+    border-top: 1px solid var(--border);
+  }
+  .how-inner { max-width: 900px; }
+  .how-label {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 2.5px; color: var(--accent); text-transform: uppercase;
+    margin-bottom: 56px;
+  }
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  }
+  .step {
+    padding: 40px 36px; background: var(--card);
+    border-right: 1px solid var(--border); transition: background 0.25s;
+  }
+  .step:last-child { border-right: none; }
+  .step:hover { background: #131320; }
+  .step-n {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 2px; margin-bottom: 20px;
+  }
+  .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+  .step p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* QUALIFIER MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(5,5,8,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid rgba(255,77,28,0.15);
+    border-radius: 20px; padding: 56px 52px;
+    max-width: 560px; width: 100%;
+    position: relative;
+    box-shadow: 0 0 80px rgba(255,77,28,0.08);
+    transform: translateY(16px); transition: transform 0.3s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute; top: 20px; right: 24px;
+    background: none; border: none; color: var(--muted);
+    font-size: 22px; cursor: none; transition: color 0.2s; line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-progress {
+    display: flex; gap: 6px; margin-bottom: 40px;
+  }
+  .progress-dot {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: var(--border); transition: background 0.4s;
+  }
+  .progress-dot.done { background: var(--accent); }
+  .progress-dot.active { background: rgba(255,77,28,0.4); }
+
+  .modal-step { display: none; }
+  .modal-step.active { display: block; }
+
+  .modal-q {
+    font-size: 22px; font-weight: 600; line-height: 1.3;
+    margin-bottom: 8px; letter-spacing: -0.5px;
+  }
+  .modal-sub {
+    font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.6;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+    font-size: 15px; color: var(--text);
+    cursor: none; text-align: left;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .opt:hover {
+    border-color: rgba(255,77,28,0.35);
+    background: rgba(255,77,28,0.05);
+    transform: translateX(4px);
+  }
+  .opt .opt-arrow { color: var(--muted); font-size: 16px; transition: all 0.2s; flex-shrink: 0; }
+  .opt:hover .opt-arrow { color: var(--accent); transform: translateX(3px); }
+
+  /* RESULT SCREENS */
+  .result-screen { display: none; text-align: center; }
+  .result-screen.active { display: block; animation: fadeUp 0.4s ease both; }
+
+  .result-emoji { font-size: 52px; margin-bottom: 20px; }
+  .result-title { font-size: 26px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .result-desc { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 32px; max-width: 380px; margin-left: auto; margin-right: auto; }
+
+  .result-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 36px; border-radius: 8px; border: none;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
+    cursor: none; text-decoration: none; transition: all 0.25s;
+    width: 100%; justify-content: center;
+  }
+  .cta-fire {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white; box-shadow: 0 0 40px rgba(255,77,28,0.3);
+  }
+  .cta-fire:hover { transform: translateY(-2px); box-shadow: 0 8px 56px rgba(255,77,28,0.5); }
+  .cta-warm {
+    background: rgba(255,140,0,0.08);
+    border: 1px solid rgba(255,140,0,0.25); color: #ff8c00;
+  }
+  .cta-warm:hover { background: rgba(255,140,0,0.14); transform: translateY(-2px); }
+  .cta-cold {
+    background: rgba(168,216,240,0.06);
+    border: 1px solid rgba(168,216,240,0.18); color: #9ecfe8;
+  }
+  .cta-cold:hover { background: rgba(168,216,240,0.11); transform: translateY(-2px); }
+
+  .result-restart {
+    display: block; margin: 16px auto 0;
+    background: none; border: none;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--muted); cursor: none; letter-spacing: 1px;
+    transition: color 0.2s; text-transform: uppercase;
+  }
+  .result-restart:hover { color: var(--text); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-logo { font-family: 'DM Mono', monospace; font-size: 13px; }
+  .footer-logo span { color: var(--accent); }
+  .footer-copy { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .reveal { opacity:0; transform:translateY(24px); transition: all 0.6s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  @media (max-width: 768px) {
+    nav { padding: 18px 24px; }
+    .nav-badge { display: none; }
+    .hero { padding: 110px 24px 60px; }
+    h1 { letter-spacing: -2px; }
+    .how { padding: 72px 24px; }
+    .steps { grid-template-columns: 1fr; }
+    .step { border-right: none; border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: none; }
+    .modal { padding: 40px 28px; }
+    .modal-q { font-size: 19px; }
+    footer { padding: 24px; flex-direction: column; gap: 10px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Only<span>Hot</span>Leads</div>
+  <div class="nav-badge">AI Lead Qualification</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-eyebrow">
+    <span class="live-dot"></span>
+    Powered by AI
+  </div>
+
+  <h1>
+    Stop chasing<br>
+    <span class="ice-text">cold leads.</span><br>
+    Let the <span class="hot-ones">hot ones</span><br>
+    come your way.
+  </h1>
+
+  <p class="hero-sub">
+    Your pipeline is frozen. Our AI qualifies every inbound lead 24/7 — so your team only talks to people ready to buy.
+  </p>
+
+  <button class="try-btn" id="openQualifier">
+    Try it on yourself <span class="btn-arrow">→</span>
+  </button>
+  <p class="hero-footnote">Takes 60 seconds · No signup needed</p>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="how-inner">
+    <div class="how-label reveal">How it works</div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-n">01</div>
+        <h3>Connect your leads</h3>
+        <p>Link your website form, CRM, or ad campaigns. Works with HubSpot, Notion, Airtable, and more.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <h3>AI qualifies 24/7</h3>
+        <p>Every lead gets scored on intent, budget fit, and urgency — automatically, while you sleep.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <h3>Only hot ones reach you</h3>
+        <p>You get a clear score + summary. Cold leads go to nurture. Hot leads go straight to your inbox.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Only<span>Hot</span>Leads</div>
+  <div class="footer-copy">© 2025 · Built with AI</div>
+</footer>
+
+<!-- QUALIFIER MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="closeModal">✕</button>
+
+    <div class="modal-progress">
+      <div class="progress-dot active" data-i="0"></div>
+      <div class="progress-dot" data-i="1"></div>
+      <div class="progress-dot" data-i="2"></div>
+      <div class="progress-dot" data-i="3"></div>
+      <div class="progress-dot" data-i="4"></div>
+    </div>
+
+    <!-- Q1 -->
+    <div class="modal-step active" data-step="0">
+      <div class="modal-q">What's your biggest sales headache right now?</div>
+      <div class="modal-sub">Be honest — this helps us figure out if we can actually help.</div>
+      <div class="options">
+        <button class="opt" data-score="3">We're drowning in unqualified leads <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">Our close rate is too low <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">We don't get enough leads yet <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">Just exploring for now <span class="opt-arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="modal-step" data-step="1">
+      <div class="modal-q">How many inbound leads do you get per month?</div>
+      <div class="modal-sub">A rough estimate is fine.</div>
+      <div class="options">
+        <button class="opt" data-score="3">200+ leads / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">50–200 leads / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">Under 50 leads / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">We don't really track this <span class="opt-arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="modal-step" data-step="2">
+      <div class="modal-q">Do you have a qualification process today?</div>
+      <div class="modal-sub">How are you filtering leads right now?</div>
+      <div class="options">
+        <button class="opt" data-score="3">All manual — it's chaos <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">Something basic, but it's not working <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">We have a system but want better <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">Not sure what that means <span class="opt-arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="modal-step" data-step="3">
+      <div class="modal-q">What's your timeline to fix this?</div>
+      <div class="modal-sub">No wrong answer here.</div>
+      <div class="options">
+        <button class="opt" data-score="3">ASAP — this is costing us money <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">Next 1–3 months <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">No rush, planning ahead <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">Just curious for now <span class="opt-arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="modal-step" data-step="4">
+      <div class="modal-q">What's your monthly budget for automation?</div>
+      <div class="modal-sub">This helps us recommend the right setup for you.</div>
+      <div class="options">
+        <button class="opt" data-score="3">$500+ / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="2">$200–$500 / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="1">Under $200 / month <span class="opt-arrow">→</span></button>
+        <button class="opt" data-score="0">No budget set yet <span class="opt-arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- RESULT: HOT 🔥 -->
+    <div class="result-screen" id="result-hot">
+      <div class="result-emoji">🔥</div>
+      <div class="result-title">You're a hot lead.</div>
+      <div class="result-desc">You've got the pain, the volume, and the urgency. This is exactly what OnlyHotLeads is built for. Let's talk — I'll map out a custom setup in 20 minutes.</div>
+      <a href="https://calendly.com/YOURLINK" target="_blank" class="result-cta cta-fire">Book a call — let's do this →</a>
+      <button class="result-restart">← Restart</button>
+    </div>
+
+    <!-- RESULT: WARM 🌤 -->
+    <div class="result-screen" id="result-warm">
+      <div class="result-emoji">🌤️</div>
+      <div class="result-title">You're a warm lead.</div>
+      <div class="result-desc">You're heading in the right direction. Drop me an email and I'll send you a free custom quote with exactly how this would work for your business.</div>
+      <a href="mailto:YOU@EMAIL.COM?subject=Free Quote — OnlyHotLeads" class="result-cta cta-warm">Get my free quote by email →</a>
+      <button class="result-restart">← Restart</button>
+    </div>
+
+    <!-- RESULT: COLD 🧊 -->
+    <div class="result-screen" id="result-cold">
+      <div class="result-emoji">🧊</div>
+      <div class="result-title">You're a cold lead — for now.</div>
+      <div class="result-desc">Not quite the right timing yet — and that's totally fine. Follow along on LinkedIn and reach out when you're ready.</div>
+      <a href="https://linkedin.com/in/YOURPROFILE" target="_blank" class="result-cta cta-cold">Follow me on LinkedIn →</a>
+      <button class="result-restart">← Restart</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  });
+  (function animRing() {
+    rx += (mx - rx) * 0.13; ry += (my - ry) * 0.13;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.width='5px'; cursor.style.height='5px'; ring.style.width='52px'; ring.style.height='52px'; });
+    el.addEventListener('mouseleave', () => { cursor.style.width='10px'; cursor.style.height='10px'; ring.style.width='34px'; ring.style.height='34px'; });
+  });
+
+  // SCROLL REVEAL
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => { if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 100); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // QUALIFIER
+  const overlay  = document.getElementById('modalOverlay');
+  const steps    = document.querySelectorAll('.modal-step');
+  const dots     = document.querySelectorAll('.progress-dot');
+  const resultScreens = {
+    hot:  document.getElementById('result-hot'),
+    warm: document.getElementById('result-warm'),
+    cold: document.getElementById('result-cold')
+  };
+  let currentStep = 0, totalScore = 0;
+
+  function openModal()  { overlay.classList.add('open');    document.body.style.overflow = 'hidden'; }
+  function closeModal() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+  function resetModal() {
+    currentStep = 0; totalScore = 0;
+    steps.forEach(s => s.classList.remove('active'));
+    Object.values(resultScreens).forEach(r => r.classList.remove('active'));
+    steps[0].classList.add('active');
+    dots.forEach((d, i) => { d.classList.remove('done', 'active'); if (i === 0) d.classList.add('active'); });
+  }
+
+  document.getElementById('openQualifier').addEventListener('click', () => { resetModal(); openModal(); });
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      totalScore += parseInt(btn.dataset.score);
+      dots[currentStep].classList.remove('active');
+      dots[currentStep].classList.add('done');
+      steps[currentStep].classList.remove('active');
+      currentStep++;
+
+      if (currentStep < steps.length) {
+        steps[currentStep].classList.add('active');
+        dots[currentStep].classList.add('active');
+      } else {
+        dots.forEach(d => d.classList.add('done'));
+        const key = totalScore >= 10 ? 'hot' : totalScore >= 5 ? 'warm' : 'cold';
+        resultScreens[key].classList.add('active');
+      }
+    });
+  });
+
+  document.querySelectorAll('.result-restart').forEach(btn => {
+    btn.addEventListener('click', resetModal);
+  });
+</script>
+</body>
+</html>
