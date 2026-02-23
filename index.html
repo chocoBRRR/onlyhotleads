@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thibaud B. — Automation sur mesure</title>
+<title>Thibaud B. — Automatisation IA sur mesure</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e1e1a'/><text x='3' y='23' font-family='serif' font-size='14' font-weight='700' fill='%23F5F2EB'>TB</text></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e1e1a'/><text x='50%' y='50%' font-family='serif' font-size='13' font-weight='700' fill='%23F5F2EB' text-anchor='middle' dominant-baseline='central'>TB</text></svg>">
 <style>
 :root {
   --bg:      #F5F2EB;
@@ -208,7 +208,7 @@ h1 .sub-word { color: var(--ink3); }
   transform: translateY(-50%);
   width: 400px;
   height: auto;
-  opacity: 0.15;
+  opacity: 0.8;
   pointer-events: none;
   z-index: 0;
   mix-blend-mode: multiply;
@@ -324,6 +324,33 @@ hr.section-rule {
   border-radius: 2px;
   padding: 5px 12px;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* TOOLS TICKER */
+.tools-ticker {
+  padding: 18px 52px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  overflow: hidden;
+  border-top: 1px solid rgba(245,242,235,0.08);
+}
+.ticker-track {
+  overflow: hidden;
+  flex: 1;
+}
+.ticker-inner {
+  display: flex;
+  gap: 8px;
+  animation: ticker-scroll 30s linear infinite;
+  width: max-content;
+}
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 /* ── SECTIONS ── */
@@ -389,6 +416,40 @@ h2 em { font-style: normal; color: var(--ink3); }
 .prob p { font-size: 14px; color: var(--ink2); line-height: 1.75; max-width: 400px; }
 
 /* HOW */
+.section-yellow {
+  background: var(--yellow);
+}
+.section-yellow .section-label {
+  color: rgba(30,30,26,0.5);
+}
+.section-yellow h2 {
+  color: var(--ink);
+}
+.section-yellow h2 em {
+  background: var(--ink);
+  color: var(--yellow);
+  font-style: normal;
+  padding: 0 6px;
+}
+.section-dark {
+  background: var(--ink);
+}
+.section-dark .section-label {
+  color: rgba(245,242,235,0.4);
+}
+.section-dark h2 {
+  color: var(--bg);
+}
+.section-dark h2 em {
+  background: var(--yellow);
+  color: var(--ink);
+  font-style: normal;
+  padding: 0 6px;
+}
+.section-dark .tool-tag {
+  color: rgba(245,242,235,0.7);
+  border-color: rgba(245,242,235,0.2);
+}
 .how-grid {
   display: grid;
   grid-template-columns: repeat(3,1fr);
@@ -396,6 +457,7 @@ h2 em { font-style: normal; color: var(--ink3); }
   background: var(--border);
   border-radius: var(--radius);
   overflow: hidden;
+  margin-top: 40px;
 }
 .how-step {
   background: var(--bg);
@@ -412,16 +474,8 @@ h2 em { font-style: normal; color: var(--ink3); }
   margin-bottom: 8px;
   letter-spacing: 2px;
 }
-.how-step h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.how-step h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--ink); }
 .how-step p { font-size: 14px; color: var(--ink2); line-height: 1.75; }
-.step-bar {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: transparent;
-  transition: background .2s;
-}
-.how-step:hover .step-bar { background: var(--yellow); }
 
 /* TOOLS */
 .tools-row {
@@ -733,7 +787,7 @@ footer {
     right: -10px;
     top: 28%;
     transform: none;
-    opacity: 0.13;
+    opacity: 0.75;
   }
   .strip { padding: 14px 24px; gap: 14px; }
   .section { padding: 48px 24px; }
@@ -743,9 +797,7 @@ footer {
   .how-grid { grid-template-columns: 1fr; }
   h1 { font-size: clamp(48px, 14vw, 80px); }
   h2 { font-size: clamp(34px, 8vw, 52px); }
-  .modal { padding: 36px 24px 32px; border-radius: var(--radius) var(--radius) 0 0; position: fixed; bottom: 0; left: 0; right: 0; max-width: 100%; transform: translateY(100%); }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal { padding: 36px 24px 32px; margin: 16px; }
   footer { padding: 22px 24px; flex-direction: column; gap: 8px; text-align: center; }
 }
 </style>
@@ -774,7 +826,7 @@ footer {
   <div class="hero-left">
     <div class="hero-tag">
       <span class="tag-line"></span>
-      <span data-fr="Automation sur mesure" data-en="Custom AI Automation">Automation sur mesure</span>
+      <span data-fr="Automatisations IA" data-en="AI Automation">Automatisations IA</span>
     </div>
 
     <div class="hero-headline-wrap">
@@ -786,8 +838,8 @@ footer {
 
     <div class="hero-divider"></div>
 
-    <p class="hero-sub" data-fr="Je construis des automatisations sur mesure pour les petites structures qui n'ont plus de temps à perdre sur des tâches à zéro valeur ajoutée." data-en="I build custom automations for small businesses that can't afford to keep wasting time on zero-value tasks.">
-      Je construis des automatisations sur mesure pour les petites structures qui n'ont plus de temps à perdre sur des tâches à zéro valeur ajoutée.
+    <p class="hero-sub" data-fr="Je construis des automatisations IA sur mesure pour les petites structures qui n'ont plus de temps à perdre sur des tâches à zéro valeur ajoutée." data-en="I build custom AI automations for small businesses that can't afford to keep wasting time on zero-value tasks.">
+      Je construis des automatisations IA sur mesure pour les petites structures qui n'ont plus de temps à perdre sur des tâches à zéro valeur ajoutée.
     </p>
 
     <div class="hero-actions">
@@ -795,7 +847,7 @@ footer {
         <span data-fr="Calculer mon temps perdu" data-en="Calculate my wasted time">Calculer mon temps perdu</span>
         <span class="btn-arr">→</span>
       </button>
-      <a href="https://calendly.com/thibaudbn/30min" target="_blank" class="btn-ghost" data-fr="ou parler directement →" data-en="or talk directly →">ou parler directement →</a>
+      <a href="https://calendly.com/thibaudbn/30min" target="_blank" class="btn-ghost" data-fr="Ou discuter maintenant →" data-en="Or discuss now →">Ou discuter maintenant →</a>
     </div>
   </div>
 
@@ -828,7 +880,7 @@ footer {
       <div class="bb-label" data-fr="Exemple · Carwash" data-en="Example · Car wash">Exemple · Carwash</div>
       <div class="bb-task">
         <span data-fr="Appels SAV répétitifs" data-en="Repetitive support calls">Appels SAV répétitifs</span>
-        <span><span class="bb-before">3h/sem</span></span>
+        <span><span class="bb-before" data-fr="3h/sem" data-en="3h/wk">3h/sem</span></span>
       </div>
       <div class="bb-task" style="border-bottom:none">
         <span data-fr="Urgences manquées" data-en="Missed urgencies">Urgences manquées</span>
@@ -846,7 +898,7 @@ footer {
 </div><!-- /.hero-section -->
 
 <div class="strip reveal">
-  <span class="strip-label" data-fr="Pour qui" data-en="For who">Pour qui</span>
+  <span class="strip-label" data-fr="Pour qui" data-en="Who is this for?">Pour qui</span>
   <div class="strip-items">
     <span class="strip-pill" data-fr="Cabinets & agences" data-en="Agencies & firms">Cabinets & agences</span>
     <span class="strip-pill" data-fr="Artisans & TPE" data-en="Tradespeople & SMBs">Artisans & TPE</span>
@@ -874,7 +926,7 @@ footer {
       <div class="prob span2">
         <div class="prob-n">03</div>
         <h3 data-fr="Les tâches récurrentes qu'on reporte" data-en="Recurring tasks that keep getting pushed back">Les tâches récurrentes qu'on reporte</h3>
-        <p data-fr="Chaque semaine les mêmes actions à faire manuellement. On les reporte, puis on les oublie, puis elles s'accumulent — jusqu'à ce que ça coûte vraiment cher." data-en="Every week the same manual tasks. You push them back, then forget them, then they pile up — until it costs you.">Chaque semaine les mêmes actions à faire manuellement. On les reporte, puis on les oublie, puis elles s'accumulent — jusqu'à ce que ça coûte vraiment cher.</p>
+        <p data-fr="Chaque semaine les mêmes actions à faire manuellement. On les reporte, puis on les oublie, puis elles s'accumulent — jusqu'à ce que ça coûte vraiment cher." data-en="Every week the same manual tasks. You push them back, then forget them, then they pile up — until it really costs you.">Chaque semaine les mêmes actions à faire manuellement. On les reporte, puis on les oublie, puis elles s'accumulent — jusqu'à ce que ça coûte vraiment cher.</p>
       </div>
     </div>
   </div>
@@ -889,45 +941,18 @@ footer {
       <div class="how-step">
         <div class="step-n">01</div>
         <h3 data-fr="Un appel de 30 min" data-en="30-min call">Un appel de 30 min</h3>
-        <p data-fr="On identifie ensemble où vous perdez le plus de temps. Aucun engagement — juste une conversation utile." data-en="We identify together where you lose the most time. No commitment — just a useful conversation.">On identifie ensemble où vous perdez le plus de temps. Aucun engagement — juste une conversation utile.</p>
-        <div class="step-bar"></div>
+        <p data-fr="On cartographie vos process et on priorise les automatisations à plus fort ROI. Vous repartez avec une vision claire de ce que ça peut vous rapporter." data-en="We map your processes and prioritize the highest-ROI automations. You leave with a clear picture of what it can bring you.">On cartographie vos process et on priorise les automatisations à plus fort ROI. Vous repartez avec une vision claire de ce que ça peut vous rapporter.</p>
       </div>
       <div class="how-step">
         <div class="step-n">02</div>
         <h3 data-fr="Je construis en 3–5 jours" data-en="I build in 3–5 days">Je construis en 3–5 jours</h3>
-        <p data-fr="Branché sur vos outils existants. Pas besoin de tout changer ou de faire une formation." data-en="Plugged into your existing tools. No need to change anything or train anyone.">Branché sur vos outils existants. Pas besoin de tout changer ou de faire une formation.</p>
-        <div class="step-bar"></div>
+        <p data-fr="Je construis sur vos outils actuels selon vos besoins, sans migration, sans formation. Vous ne touchez à rien — ça tourne automatiquement." data-en="I build on your current tools, no migration, no training. You don't touch a thing — it just runs.">Je construis sur vos outils actuels selon vos besoins, sans migration, sans formation. Vous ne touchez à rien — ça tourne automatiquement.</p>
       </div>
       <div class="how-step">
         <div class="step-n">03</div>
         <h3 data-fr="Vous reprenez le contrôle" data-en="You take back control">Vous reprenez le contrôle</h3>
-        <p data-fr="Livré sur vos propres comptes. Je vous explique tout, vous repartez autonome. One-shot, pas d'abonnement." data-en="Delivered on your own accounts. I walk you through everything, you leave fully autonomous. One-shot, no subscription.">Livré sur vos propres comptes. Je vous explique tout, vous repartez autonome. One-shot, pas d'abonnement.</p>
-        <div class="step-bar"></div>
+        <p data-fr="Livré sur vos comptes, expliqué clairement. Vous êtes autonome dès le premier jour." data-en="Delivered to your accounts, clearly explained. You're autonomous from day one.">Livré sur vos comptes, expliqué clairement. Vous êtes autonome dès le premier jour.</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- TOOLS -->
-<section class="section">
-  <div class="section-inner">
-    <div class="section-label reveal" data-fr="Stack" data-en="Stack">Stack</div>
-    <h2 class="reveal" data-fr="JE ME BRANCHE SUR <em>VOS OUTILS.</em>" data-en="I PLUG INTO <em>YOUR TOOLS.</em>">JE ME BRANCHE SUR <em>VOS OUTILS.</em></h2>
-    <div class="tools-row reveal">
-      <span class="tool-tag">n8n</span>
-      <span class="tool-tag">HubSpot</span>
-      <span class="tool-tag">Notion</span>
-      <span class="tool-tag">Airtable</span>
-      <span class="tool-tag">Zapier</span>
-      <span class="tool-tag">Gmail</span>
-      <span class="tool-tag">Slack</span>
-      <span class="tool-tag">Google Sheets</span>
-      <span class="tool-tag">Pennylane</span>
-      <span class="tool-tag">Pipedrive</span>
-      <span class="tool-tag">WhatsApp</span>
-      <span class="tool-tag">Twilio</span>
-      <span class="tool-tag">ElevenLabs</span>
-      <span class="tool-tag" data-fr="+ vos outils" data-en="+ your tools">+ vos outils</span>
     </div>
   </div>
 </section>
@@ -939,6 +964,10 @@ footer {
     <h2 class="reveal" data-fr="CE QUE VOUS <em>VOULEZ SAVOIR.</em>" data-en="WHAT YOU <em>WANT TO KNOW.</em>">CE QUE VOUS <em>VOULEZ SAVOIR.</em></h2>
     <div class="faq-list reveal">
       <div class="faq-item">
+        <button class="faq-q"><span data-fr="C'est quoi une automatisation IA ?" data-en="What is AI automation?">C'est quoi une automatisation IA ?</span><span class="faq-icon">+</span></button>
+        <div class="faq-a" data-fr="Une automatisation classique suit des règles fixes — si X alors Y. L'IA permet d'aller plus loin : lire et comprendre un email pour en extraire les infos clés, classer automatiquement une demande, générer un premier brouillon de réponse. Dans la pratique, la plupart des workflows combinent les deux — la logique no-code pour la structure, l'IA pour les tâches qui demandent de l'interprétation." data-en="Classic automation follows fixed rules — if X then Y. AI goes further: reading and understanding an email to extract key info, automatically classifying a request, drafting a first response. In practice, most workflows combine both — no-code logic for structure, AI for tasks that require interpretation.">Une automatisation classique suit des règles fixes — si X alors Y. L'IA permet d'aller plus loin : lire et comprendre un email pour en extraire les infos clés, classer automatiquement une demande, générer un premier brouillon de réponse. Dans la pratique, la plupart des workflows combinent les deux — la logique no-code pour la structure, l'IA pour les tâches qui demandent de l'interprétation.</div>
+      </div>
+      <div class="faq-item">
         <button class="faq-q"><span data-fr="Combien ça coûte ?" data-en="How much does it cost?">Combien ça coûte ?</span><span class="faq-icon">+</span></button>
         <div class="faq-a" data-fr="Chaque projet est différent. Une automatisation simple démarre autour de 600€ — one-shot, sans abonnement. Vous payez une fois, ça tourne tout seul sur vos propres comptes." data-en="Every project is different. A simple automation starts around €600 — one-shot, no subscription. Pay once, runs on your own accounts.">Chaque projet est différent. Une automatisation simple démarre autour de 600€ — one-shot, sans abonnement. Vous payez une fois, ça tourne tout seul sur vos propres comptes.</div>
       </div>
@@ -947,12 +976,12 @@ footer {
         <div class="faq-a" data-fr="Non. Je m'adapte à ce que vous utilisez déjà. L'objectif c'est de connecter vos outils entre eux — pas de tout remplacer." data-en="No. I adapt to what you already use. The goal is to connect your tools — not replace everything.">Non. Je m'adapte à ce que vous utilisez déjà. L'objectif c'est de connecter vos outils entre eux — pas de tout remplacer.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q"><span data-fr="Que se passe-t-il si quelque chose casse ?" data-en="What if something breaks?">Que se passe-t-il si quelque chose casse ?</span><span class="faq-icon">+</span></button>
-        <div class="faq-a" data-fr="Tout est livré sur vos propres comptes avec une documentation claire. Si vous avez besoin d'une intervention ponctuelle, c'est possible — pas de contrat forcé." data-en="Everything is delivered on your own accounts with clear docs. If you need occasional support, that's available — no forced contract.">Tout est livré sur vos propres comptes avec une documentation claire. Si vous avez besoin d'une intervention ponctuelle, c'est possible — pas de contrat forcé.</div>
+        <button class="faq-q"><span data-fr="En combien de temps c'est livré ?" data-en="How long does it take?">En combien de temps c'est livré ?</span><span class="faq-icon">+</span></button>
+        <div class="faq-a" data-fr="3 à 5 jours ouvrés généralement, après un appel de cadrage de 30 minutes." data-en="3 to 5 business days for most projects, after a 30-minute scoping call.">3 à 5 jours ouvrés généralement, après un appel de cadrage de 30 minutes.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q"><span data-fr="En combien de temps c'est livré ?" data-en="How fast?">En combien de temps c'est livré ?</span><span class="faq-icon">+</span></button>
-        <div class="faq-a" data-fr="3 à 5 jours ouvrés pour la plupart des projets, après un appel de cadrage de 30 minutes." data-en="3 to 5 business days for most projects, after a 30-minute scoping call.">3 à 5 jours ouvrés pour la plupart des projets, après un appel de cadrage de 30 minutes.</div>
+        <button class="faq-q"><span data-fr="Et si j'ai besoin d'aide après ?" data-en="What if I need help after delivery?">Et si j'ai besoin d'aide après ?</span><span class="faq-icon">+</span></button>
+        <div class="faq-a" data-fr="Tout est livré sur vos propres comptes avec une documentation claire. Si vous souhaitez une maintenance régulière ou faire évoluer le workflow, c'est possible — on en discute selon vos besoins." data-en="Everything is delivered on your own accounts with clear docs. If you want regular maintenance or want to evolve the workflow, that's possible — we'll work it out based on your needs.">Tout est livré sur vos propres comptes avec une documentation claire. Si vous souhaitez une maintenance régulière ou faire évoluer le workflow, c'est possible — on en discute selon vos besoins.</div>
       </div>
     </div>
   </div>
@@ -973,7 +1002,8 @@ footer {
 
 <footer>
   <div class="footer-logo">THIBAUD B.</div>
-  <div class="footer-copy" data-fr="AUTOMATION SUR MESURE · 2026" data-en="CUSTOM AUTOMATION · 2026">AUTOMATION SUR MESURE · 2026</div>
+  <div class="footer-copy" data-fr="AUTOMATISATION IA SUR MESURE · 2026" data-en="CUSTOM AI AUTOMATION · 2026">AUTOMATISATION IA SUR MESURE · 2026</div>
+  <div class="footer-copy"><a href="mailto:tbdbn@icloud.com" style="color:inherit;text-decoration:none;letter-spacing:1px;">tbdbn@icloud.com</a></div>
 </footer>
 
 <!-- MODAL QUIZ -->
@@ -994,7 +1024,7 @@ footer {
     <!-- Q1 -->
     <div class="modal-step active" data-step="0">
       <div class="modal-q" data-fr="Quel type d'activité ?" data-en="What type of business?">Quel type d'activité ?</div>
-      <div class="modal-sub" data-fr="Pour cibler les bonnes automatisations." data-en="To target the right automations.">Pour cibler les bonnes automatisations.</div>
+      <div class="modal-sub" data-fr="5 questions pour estimer votre potentiel d'automatisation." data-en="5 questions to estimate your automation potential.">5 questions pour estimer votre potentiel d'automatisation.</div>
       <div class="options">
         <button class="opt" data-score="3" data-time="8"><span data-fr="Cabinet, agence ou bureau d'études" data-en="Agency, firm or engineering studio">Cabinet, agence ou bureau d'études</span><span class="opt-arr">→</span></button>
         <button class="opt" data-score="3" data-time="7"><span data-fr="Artisan, commerçant ou service local" data-en="Tradesperson or local service">Artisan, commerçant ou service local</span><span class="opt-arr">→</span></button>
@@ -1006,7 +1036,7 @@ footer {
     <!-- Q2 -->
     <div class="modal-step" data-step="1">
       <div class="modal-q" data-fr="Où perdez-vous le plus de temps ?" data-en="Where do you lose the most time?">Où perdez-vous le plus de temps ?</div>
-      <div class="modal-sub" data-fr="Ce qui vous coûte le plus chaque semaine." data-en="What costs you the most each week.">Ce qui vous coûte le plus chaque semaine.</div>
+      <div class="modal-sub" data-fr="Ce qui vous coûte le plus chaque semaine." data-en="The tasks that cost you the most each week.">Ce qui vous coûte le plus chaque semaine.</div>
       <div class="options">
         <button class="opt" data-score="3" data-time="5"><span data-fr="Devis, factures, documents" data-en="Quotes, invoices, documents">Devis, factures, documents</span><span class="opt-arr">→</span></button>
         <button class="opt" data-score="3" data-time="4"><span data-fr="Emails et communication client" data-en="Emails and client communication">Emails et communication client</span><span class="opt-arr">→</span></button>
@@ -1045,7 +1075,7 @@ footer {
       <div class="modal-sub" data-fr="Pour savoir comment prioriser." data-en="To know how to prioritize.">Pour savoir comment prioriser.</div>
       <div class="options">
         <button class="opt" data-score="3" data-time="0"><span data-fr="Ça me coûte de l'argent maintenant" data-en="It's costing me money now">Ça me coûte de l'argent maintenant</span><span class="opt-arr">→</span></button>
-        <button class="opt" data-score="2" data-time="0"><span data-fr="Je veux régler ça ce trimestre" data-en="I want to fix this this quarter">Je veux régler ça ce trimestre</span><span class="opt-arr">→</span></button>
+        <button class="opt" data-score="2" data-time="0"><span data-fr="Je veux régler ça ce trimestre" data-en="I want to sort this out this quarter">Je veux régler ça ce trimestre</span><span class="opt-arr">→</span></button>
         <button class="opt" data-score="1" data-time="0"><span data-fr="C'est sur mon radar, pas urgent" data-en="On my radar, not urgent">C'est sur mon radar, pas urgent</span><span class="opt-arr">→</span></button>
         <button class="opt" data-score="0" data-time="0"><span data-fr="Je me renseigne seulement" data-en="Just gathering info">Je me renseigne seulement</span><span class="opt-arr">→</span></button>
       </div>
